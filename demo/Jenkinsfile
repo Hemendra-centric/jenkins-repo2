@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the repository code
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Change to the 'demo' directory and compile the Java application
+                script {
+                    bat 'cd demo && mvn clean compile'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Change to the 'demo' directory and run unit tests
+                script {
+                    bat 'cd demo && mvn test'
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                // Change to the 'demo' directory and package the application (e.g., create a JAR/WAR file)
+                script {
+                    bat 'cd demo && mvn package'
+                }
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                // Archive the JAR/WAR file for later use
+                archiveArtifacts artifacts: 'demo/target/*.jar', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build and Test stages completed successfully!'
+        }
+        failure {
+            echo 'Something went wrong! Check the logs.'
+        }
+    }
+}
