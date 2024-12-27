@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'PROJECT_DIR', defaultValue: 'demo', description: 'Directory of the project')
+        string(name: 'MAVEN_GOAL', defaultValue: 'clean compile', description: 'Maven goal to execute (e.g., clean compile, test, package)')
+        string(name: 'ARTIFACT_PATH', defaultValue: 'target/*.jar', description: 'Path to the artifact to archive')
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -11,35 +17,35 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Change to the 'demo' directory and compile the Java application
+                // Change to the specified project directory and execute the Maven goal
                 script {
-                    bat 'cd demo && mvn clean compile'
+                    bat "cd ${params.PROJECT_DIR} && mvn ${params.MAVEN_GOAL}"
                 }
             }
         }
 
         stage('Test') {
             steps {
-                // Change to the 'demo' directory and run unit tests
+                // Run unit tests with the specified Maven goal (can be modified based on the parameter)
                 script {
-                    bat 'cd demo && mvn test'
+                    bat "cd ${params.PROJECT_DIR} && mvn test"
                 }
             }
         }
 
         stage('Package') {
             steps {
-                // Change to the 'demo' directory and package the application (e.g., create a JAR/WAR file)
+                // Package the application (e.g., create a JAR/WAR file) using the specified Maven goal
                 script {
-                    bat 'cd demo && mvn package'
+                    bat "cd ${params.PROJECT_DIR} && mvn package"
                 }
             }
         }
 
         stage('Archive Artifacts') {
             steps {
-                // Archive the JAR/WAR file for later use
-                archiveArtifacts artifacts: 'demo/target/*.jar', fingerprint: true
+                // Archive the artifact based on the parameter
+                archiveArtifacts artifacts: "${params.PROJECT_DIR}/${params.ARTIFACT_PATH}", fingerprint: true
             }
         }
     }
